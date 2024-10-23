@@ -5,8 +5,13 @@ from PIL import Image
 from groq import Groq
 
 # Initializing the Groq API for refining captions
-client = Groq(api_key='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')
+groq_api_key = st.secrets["GROQ_API_KEY"]
 
+if groq_api_key:
+    client = Groq(api_key=groq_api_key)
+else:
+    st.error("Groq API key not found. Please set the GROQ_API_KEY in the Streamlit Cloud Secrets.")
+    
 # Loading my custom BLIP model and processor from HuggingFace
 model = BlipForConditionalGeneration.from_pretrained("sagniksengupta/blip-finetuned-facad")
 processor = BlipProcessor.from_pretrained("sagniksengupta/blip-finetuned-facad")
