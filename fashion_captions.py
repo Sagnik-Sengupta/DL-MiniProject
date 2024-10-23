@@ -1,6 +1,6 @@
 import streamlit as st
 import torch
-from transformers import BlipProcessor, BlipForConditionalGeneration
+from transformers import BlipProcessor, BlipForConditionalGeneration, AutoProcessor, AutoModelForCausalLM
 from PIL import Image
 from groq import Groq
 
@@ -11,16 +11,9 @@ if groq_api_key:
     client = Groq(api_key=groq_api_key)
 else:
     st.error("Groq API key not found. Please set the GROQ_API_KEY in the Streamlit Cloud Secrets.")
-    
-# Loading my custom BLIP model and processor from HuggingFace
-model = BlipForConditionalGeneration.from_pretrained("sagniksengupta/blip-finetuned-facad")
-processor = BlipProcessor.from_pretrained("sagniksengupta/blip-finetuned-facad")
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = model.to(device)
 
 # Streamlit app for deploying the model
-st.title("🛍️ Fashion Image Captioning with BLIP-FACAD")
+st.title("🛍️ Fashion Image Captioning")
 st.write("**Upload an image or take a picture using the webcam to generate a caption.**")
 
 st.markdown("""
@@ -31,6 +24,20 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Option to select model type
+model_type = st.selectbox("Choose Model Type:", ["BLIP", "GIT"])
+
+# Load models and processors based on user selection
+if model_type == "BLIP":
+    model = BlipForConditionalGeneration.from_pretrained("sagniksengupta/blip-finetuned-facad")
+    processor = BlipProcessor.from_pretrained("sagniksengupta/blip-finetuned-facad")
+elif model_type == "GIT":
+    model = AutoModelForCausalLM.from_pretrained("sagniksengupta/git-finetuned-facad")
+    processor = AutoProcessor.from_pretrained("sagniksengupta/git-finetuned-facad")
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = model.to(device)
 
 # Option to upload image or use the webcam
 option = st.radio(
