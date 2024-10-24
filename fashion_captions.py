@@ -26,16 +26,22 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Option to select model type
-model_type = st.selectbox("Choose Model Type:", ["BLIP Fine-Tuned", "GIT Fine-Tuned"])
+model_type = st.selectbox("Choose Model Type:", ["BLIP Fine-Tuned", "GIT Fine-Tuned", "BLIP", "GIT"])
 
 # Load models and processors based on user selection
-if model_type == "BLIP":
+if model_type == "BLIP Fine-Tuned":
     model = BlipForConditionalGeneration.from_pretrained("sagniksengupta/blip-finetuned-facad")
     processor = BlipProcessor.from_pretrained("sagniksengupta/blip-finetuned-facad")
-elif model_type == "GIT":
+elif model_type == "GIT Fine-Tuned":
     model = AutoModelForCausalLM.from_pretrained("sagniksengupta/git-finetuned-facad")
     processor = AutoProcessor.from_pretrained("sagniksengupta/git-finetuned-facad")
-
+elif model_type == "BLIP":
+    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+    processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+elif model_type == "GIT":
+    model = AutoModelForCausalLM.from_pretrained("microsoft/git-base-coco")
+    processor = AutoProcessor.from_pretrained("microsoft/git-base-coco")
+    
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
