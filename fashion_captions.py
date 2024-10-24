@@ -26,7 +26,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Option to select model type
-model_type = st.selectbox("Choose Model Type:", ["BLIP", "GIT"])
+model_type = st.selectbox("Choose Model Type:", ["BLIP Fine-Tuned", "GIT Fine-Tuned"])
 
 # Load models and processors based on user selection
 if model_type == "BLIP":
