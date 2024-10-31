@@ -41,7 +41,7 @@ elif model_type == "BLIP":
 elif model_type == "GIT":
     model = AutoModelForCausalLM.from_pretrained("microsoft/git-base-coco")
     processor = AutoProcessor.from_pretrained("microsoft/git-base-coco")
-    
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
@@ -63,12 +63,12 @@ if option == 'Take a Picture via Webcam':
 
 # Upload functionality
 elif option == 'Upload Image':
-    uploaded_file = st.file_uploader("Choose an image...", type="jpg")
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
         st.image(image, caption="Uploaded Image", use_column_width=True)
 
-# Generate original model caption and refine caption using Llama 3.1
+# Generate original model caption and refine caption using LLaMA
 if image is not None:
     with st.spinner("Generating caption..."):
         inputs = processor(image, return_tensors="pt").to(device)
@@ -76,24 +76,23 @@ if image is not None:
             generated_ids = model.generate(**inputs)
             caption = processor.decode(generated_ids[0], skip_special_tokens=True)
 
-    st.write("Generated Original Model Caption: ", caption)
+    # Display the refined caption directly without spinner
+    prompt = f"""Fix the grammar and make the following caption coherent:
 
-    # LLaMA 3.1 Refining
-    if st.button("Refine Caption using Llama 3.1"):
-        with st.spinner("Refining the caption with LLaMA..."):
-            prompt = f"""Fix the grammar and make the following caption coherent:
+    Caption: "{caption}"
 
-            Caption: "{caption}"
+    Return only the updated caption."""
 
-            Return the only the updated caption."""
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        model="llama-3.1-70b-versatile"
+    )
 
-            chat_completion = client.chat.completions.create(
-                messages=[
-                    {"role": "user", "content": prompt}
-                ],
-                model="llama-3.1-70b-versatile"
-            )
+    refined_caption = chat_completion.choices[0].message.content.strip()
+    st.success("Caption: " + refined_caption)  # Changed here
 
-            refined_caption = chat_completion.choices[0].message.content.strip()
-
-        st.success("Refined Caption: " + refined_caption)
+    # Option to show the original model caption
+    if st.checkbox("Show Original Model Caption"):
+        st.write("Generated Original Model Caption: ", caption)
