@@ -87,7 +87,7 @@ if image is not None:
         messages=[
             {"role": "user", "content": prompt}
         ],
-        model="llama-3.1-70b-versatile"
+        model="llama-3.3-70b-versatile"
     )
 
     refined_caption = chat_completion.choices[0].message.content.strip()
